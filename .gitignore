@@ -1,0 +1,26 @@
+# Python
+backend/.venv/
+backend/.venv-wsl/
+**/.venv/
+**/.venv-wsl/
+__pycache__/
+*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# Bridge secrets and local runtime data
+backend/certs/
+backend/secrets/
+backend/data/
+
+# Generated audits / local diagnostics (reproducible from scripts)
+reports/

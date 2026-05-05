@@ -1,0 +1,57 @@
+---
+description: Jetspace Monitor — canonical paths, local API, Modal semantics, and safety for agents
+alwaysApply: true
+---
+
+# Jetspace compute contract (for all agents)
+
+Use this project as a **localhost control plane** plus optional **Modal remote workers**. Do not assume cross-OS `localhost` is shared (Windows vs WSL vs Linux are different loopback stacks unless explicitly bridged).
+
+## Canonical paths (set explicitly on each machine)
+
+- **Windows (example):** `C:\Users\<you>\jetspace-monitor` — replace `<you>` with the account on that PC.
+- **WSL (same working tree):** `/mnt/<drive-letter>/<path-to>/jetspace-monitor` (e.g. `/mnt/c/Users/<you>/jetspace-monitor`).
+- **Linux:** wherever the repo is cloned; prefer a stable path and document it.
+
+**Override with environment (recommended for multi-machine setups):**
+
+- `JETSPACE_ROOT` — repository root (optional; auto-derived from `backend/jetspace_paths.py` if unset).
+- `JETSPACE_REPORTS_DIR` — report output directory (default `<repo>/reports`).
+- `JETSPACE_API_BASE` — local FastAPI base URL (default `http://127.0.0.1:8010`).
+
+## Local API (when `uvicorn` is running)
+
+- Base: `JETSPACE_API_BASE` (typically `http://127.0.0.1:8010`).
+- **Health:** `GET /health`
+- **Physics / pressure:** `GET /physics/state`
+- **Aggregated control snapshot:** `GET /control/state`
+- **Realtime stream:** `WS /ws` (JSON with `sample` + `physics`)
+- **Modal semantics (what runs where):** `GET /modal/workflow` — **single source of truth** for `local_shell` vs `modal_remote_cpu` vs `modal_remote_gpu`.
+- **Latest Modal network diagnostic JSON:** `GET /modal/latest-diagnostic`
+- **WSL/Windows interop notes:** `GET /interop/summary`
+- **Cleanup:** `GET /cleanup/plan`, `POST /cleanup/run?confirm=true&dry_run=...` (destructive paths are gated; respect dry-run defaults).
+
+Compact HTML panels: `GET /mini`, `GET /control`.
+
+## Modal (remote compute)
+
+- **CLI auth** is always **local** (`modal setup`); it does not imply a GPU job ran.
+- **CPU vs GPU** evidence comes from Modal app runs (e.g. `modal/runtime_telemetry.py`), not from CLI probes alone.
+- **Secrets:** use Modal Secrets / env on the host — never paste tokens into chat, rules, or the repo. Never commit `.env` with real secrets.
+
+Entrypoints (from repo root):
+
+- `modal/get_started.py`, `modal/secret_probe.py`, `modal/runtime_telemetry.py`
+- Local diagnostics: `backend/scripts/modal_network_diagnose.py`
+- Windows: `scripts/modal-setup.ps1`, `scripts/modal-network-diagnose.ps1`
+- WSL/Linux: `scripts/wsl-modal-setup.sh`, `scripts/wsl-modal-network-diagnose.sh`
+
+## Coding discipline
+
+- Prefer small, task-scoped diffs; match existing style.
+- Do not broaden scope (no drive-by refactors) unless asked.
+- Reports and audits go under `reports/` unless `JETSPACE_REPORTS_DIR` overrides.
+
+## GitHub / attribution
+
+- Keep **authorship and license** honest and visible. If publishing under more than one GitHub namespace, use **explicit remotes** and mirrors (see maintainer docs or team runbook) — not misleading attribution.
