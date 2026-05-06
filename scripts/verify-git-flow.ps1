@@ -28,6 +28,13 @@ try {
     exit 1
   }
 
+  if ($origin -match '^git@github\.com:') {
+    Write-Warning "origin uses git@github.com: (default SSH host). With two GitHub accounts, SSH often picks the wrong key and push fails with 'denied to joel-saucedo'."
+    Write-Warning "Fix: run .\scripts\set-origin-invasivejet.ps1 (uses github.com-ij by default) or:"
+    Write-Warning "  git remote set-url origin git@github.com-ij:invasivejet/jetspace-monitor.git"
+    Write-Warning "Ensure ~/.ssh/config has Host github.com-ij with IdentityFile for invasivejet."
+  }
+
   Write-Host "OK: origin -> $origin"
   Write-Host ""
   Write-Host "All remotes:"

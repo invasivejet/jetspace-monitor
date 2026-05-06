@@ -55,7 +55,8 @@ cd C:\Users\joela\jetspace-monitor
 
 ## 5) If push is rejected
 
-- **Permission denied** → wrong SSH key; fix `Host github.com-ij` + `IdentityFile`.  
+- **`Permission to invasivejet/... denied to joel-saucedo`** → GitHub accepted your SSH connection as **joel-saucedo** (wrong key). This usually means `origin` uses `git@github.com:...` instead of the **`github.com-ij`** host alias. Run `.\scripts\set-origin-invasivejet.ps1` again (it sets `git@github.com-ij:invasivejet/jetspace-monitor.git`) and confirm `ssh -T git@github.com-ij` prints **invasivejet**.
+- **Permission denied (publickey)** → no key offered; add invasivejet’s public key to GitHub or fix `IdentityFile` path in `~/.ssh/config`.
 - **Rejected (non-fast-forward)** → someone else pushed; `git pull --rebase origin main` then push again.  
 - **Empty remote** → first push must be `git push -u origin main` from a repo that already has commits.
 
