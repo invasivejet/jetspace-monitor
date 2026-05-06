@@ -4,14 +4,16 @@
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-  Write-Error "git not found in PATH. Install Git for Windows or use 'Git Bash' / WSL where git is installed."
+. "$PSScriptRoot\Find-Git.ps1"
+$git = Get-JetspaceGitExe
+if (-not $git) {
+  Write-Error "git.exe not found. Install Git for Windows: https://git-scm.com/download/win"
   exit 2
 }
 
 Push-Location $repoRoot
 try {
-  $origin = (git remote get-url origin 2>$null)
+  $origin = (& $git remote get-url origin 2>$null)
   if (-not $origin) {
     Write-Error "No 'origin' remote. Run: .\scripts\set-origin-invasivejet.ps1"
     exit 1
@@ -29,10 +31,10 @@ try {
   Write-Host "OK: origin -> $origin"
   Write-Host ""
   Write-Host "All remotes:"
-  git remote -v
+  & $git remote -v
   Write-Host ""
   Write-Host "Reachability (read-only):"
-  git ls-remote origin HEAD 2>&1 | Select-Object -First 3
+  & $git ls-remote origin HEAD
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "git ls-remote failed (SSH key, network, or repo empty). Fix SSH then retry."
     exit 1

@@ -65,6 +65,24 @@ If SSH uses a host alias (e.g. `github.com-ij`), pass `-SshHostAlias github.com-
 
 The previous **`joel-saucedo`** remote is kept as **`joel-saucedo`** for fetch/merge when needed. Full notes: **`docs/GITHUB-REMOTES-AND-ORGS.md`**.
 
+### If `git push` says “Permission denied … to joel-saucedo”
+
+Your SSH client is offering **joel-saucedo’s** key to `git@github.com`, but **`origin`** points at **invasivejet**’s repo. GitHub rejects that.
+
+**Fix (pick one):**
+
+1. **SSH config host alias** (recommended): add a `Host` block for **invasivejet**’s key (see `scripts/ssh-config.github.template`), then set:
+
+   ```bash
+   git remote set-url origin git@github.com-ij:invasivejet/jetspace-monitor.git
+   ```
+
+   (`github.com-ij` must match your `~/.ssh/config` `Host` name.)
+
+2. **Test:** `ssh -T git@github.com-ij` should print **invasivejet**, not joel-saucedo.
+
+3. **Then:** `git push -u origin main`
+
 ## Further reading
 
 | Doc | Topic |
@@ -72,4 +90,13 @@ The previous **`joel-saucedo`** remote is kept as **`joel-saucedo`** for fetch/m
 | `docs/architecture.md` | Design, bridge, cleanup, Modal tiers |
 | `docs/PACKAGING.md` | What belongs in Git vs local-only |
 | `docs/GITHUB-REMOTES-AND-ORGS.md` | invasivejet, jetbundle org, remotes |
+| `docs/PRIVATE-REPO-FIRST-PUSH.md` | Private repo on invasivejet + first `git push` |
+| `docs/ROADMAP-SITE-AND-COMPUTE.md` | jetbundle.github.io vs hosted API |
 | `README.md` | Extended quick start, Modal, hotkeys |
+
+### Commit + push (script finds `git.exe`)
+
+```powershell
+cd C:\Users\<you>\jetspace-monitor
+.\scripts\commit-and-push-origin.ps1 -Message "Describe your change"
+```

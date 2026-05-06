@@ -1,31 +1,39 @@
+# Push current branch to primary + secondary GitHub remotes.
+# Canonical layout (see docs/GITHUB-REMOTES-AND-ORGS.md):
+#   origin       -> invasivejet/jetspace-monitor (day-to-day)
+#   joel-saucedo -> legacy copy on joel-saucedo (if set by set-origin-invasivejet.ps1)
+# Alternate: remote named "mirror" is pushed if joel-saucedo is absent.
 param(
-  [string]$Branch = ""
+    [string] $Branch = ""
 )
-
 $ErrorActionPreference = "Stop"
-$projectRoot = Split-Path -Parent $PSScriptRoot
-
-Push-Location $projectRoot
+. "$PSScriptRoot\Find-Git.ps1"
+$git = Get-JetspaceGitExe
+if (-not $git) {
+    Write-Error "git.exe not found. Install Git for Windows: https://git-scm.com/download/win"
+    exit 2
+}
+$repoRoot = Split-Path -Parent $PSScriptRoot
+Push-Location $repoRoot
 try {
-  $target = if ($Branch) { $Branch } else { (& git rev-parse --abbrev-ref HEAD).Trim() }
-  Write-Host "Pushing branch: $target"
-
-  git remote get-url origin 2>$null | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    Write-Error "Remote 'origin' is not configured."
-    exit 1
-  }
-  git remote get-url mirror 2>$null | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    Write-Error "Remote 'mirror' is not configured. Run: .\scripts\setup-github-mirror-remote.ps1 -SshHostAlias github.com-ij"
-    exit 1
-  }
-
-  git push -u origin $target
-  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-  git push -u mirror $target
-  exit $LASTEXITCODE
+    if (-not $Branch) {
+        $Branch = (& $git rev-parse --abbrev-ref HEAD).Trim()
+    }
+    Write-Host "Pushing $Branch to origin..."
+    & $git push origin $Branch
+    $secondary = $null
+    $urls = (& $git remote 2>$null)
+    if ($urls -contains "joel-saucedo") { $secondary = "joel-saucedo" }
+    elseif ($urls -contains "mirror") { $secondary = "mirror" }
+    if ($secondary) {
+        Write-Host "Pushing $Branch to $secondary..."
+        & $git push $secondary $Branch
+    }
+    else {
+        Write-Host "No secondary remote (joel-saucedo or mirror). Only origin was pushed."
+        Write-Host "To add legacy remote: run set-origin-invasivejet.ps1 once (it preserves joel-saucedo)."
+    }
+    Write-Host "Done."
 } finally {
-  Pop-Location
+    Pop-Location
 }

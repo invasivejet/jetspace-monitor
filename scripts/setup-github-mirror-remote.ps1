@@ -1,32 +1,32 @@
+# Add or update a second remote (default name: mirror) for another GitHub namespace.
+# Use an SSH Host alias when you have two keys (see AGENTS.md).
 param(
-  [Parameter(Mandatory = $true)]
-  [string]$SshHostAlias,
-
-  [string]$Owner = "invasivejet",
-  [string]$Repo = "jetspace-monitor",
-  [string]$RemoteName = "mirror"
+    [string] $SshHostAlias = "github.com-ij",
+    [string] $Owner = "invasivejet",
+    [string] $Repo = "jetspace-monitor",
+    [string] $RemoteName = "mirror"
 )
-
 $ErrorActionPreference = "Stop"
-$projectRoot = Split-Path -Parent $PSScriptRoot
-$repoUrl = "git@${SshHostAlias}:${Owner}/${Repo}.git"
-
-Push-Location $projectRoot
+. "$PSScriptRoot\Find-Git.ps1"
+$git = Get-JetspaceGitExe
+if (-not $git) {
+    Write-Error "git.exe not found. Install Git for Windows: https://git-scm.com/download/win"
+    exit 2
+}
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$url = "git@${SshHostAlias}:${Owner}/${Repo}.git"
+Push-Location $repoRoot
 try {
-  $hasRemote = $false
-  git remote get-url $RemoteName 2>$null | Out-Null
-  if ($LASTEXITCODE -eq 0) { $hasRemote = $true }
-
-  if ($hasRemote) {
-    Write-Host "Updating remote '$RemoteName' -> $repoUrl"
-    git remote set-url $RemoteName $repoUrl
-  } else {
-    Write-Host "Adding remote '$RemoteName' -> $repoUrl"
-    git remote add $RemoteName $repoUrl
-  }
-
-  Write-Host ""
-  git remote -v
+    $has = & $git remote 2>$null | Select-String -Pattern "^${RemoteName}$" -Quiet
+    if ($has) {
+        & $git remote set-url $RemoteName $url
+        Write-Host "Updated $RemoteName -> $url"
+    }
+    else {
+        & $git remote add $RemoteName $url
+        Write-Host "Added $RemoteName -> $url"
+    }
+    & $git remote -v
 } finally {
-  Pop-Location
+    Pop-Location
 }

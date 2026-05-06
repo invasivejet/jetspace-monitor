@@ -2,7 +2,7 @@
 
 Organized MVP for safe, real-time system observability.
 
-**User guide (what it does, how to run it, private GitHub on invasivejet):** [`docs/USAGE.md`](docs/USAGE.md)
+**User guide (what it does, how to run it, private GitHub on invasivejet):** [`docs/USAGE.md`](docs/USAGE.md) · **First private push:** [`docs/PRIVATE-REPO-FIRST-PUSH.md`](docs/PRIVATE-REPO-FIRST-PUSH.md) · **Site → compute roadmap:** [`docs/ROADMAP-SITE-AND-COMPUTE.md`](docs/ROADMAP-SITE-AND-COMPUTE.md)
 
 ## Structure
 
