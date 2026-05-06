@@ -60,6 +60,26 @@ cd C:\Users\joela\jetspace-monitor
 - **Rejected (non-fast-forward)** → someone else pushed; `git pull --rebase origin main` then push again.  
 - **Empty remote** → first push must be `git push -u origin main` from a repo that already has commits.
 
-## 6) Automation limit
+## 6) WSL: “Permission denied … denied to joel-saucedo” on invasivejet
 
-This workspace cannot run `git push` with your credentials. You must run the commands on a machine where **Git + SSH** work.
+Your default `~/.ssh/id_rsa` is tied to **joel-saucedo**. Pushing to **invasivejet/jetspace-monitor** needs either:
+
+- A **second key** on the **invasivejet** account + SSH host alias **`github.com-ij`**, or  
+- **Collaborator** access: invasivejet adds **joel-saucedo** to the private repo with **Write**.
+
+**Recommended (separate key):**
+
+```bash
+cd /mnt/c/Users/joela/jetspace-monitor
+bash scripts/ssh-keygen-github-wsl.sh invasivejet
+# add ~/.ssh/id_ed25519_invasivejet.pub to GitHub (as invasivejet)
+bash scripts/wsl-fix-origin-invasivjet-ssh.sh
+ssh -T git@github.com-ij
+git push origin main
+```
+
+Until that is done, you can still push to **joel-saucedo** (backup remote): `git push joel-saucedo main`.
+
+## 7) Automation limit
+
+Automated agents cannot complete `git push` with your credentials. Run Git + SSH on your machine.
