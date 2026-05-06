@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -25,8 +26,8 @@ def main() -> None:
         with stream_file.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, separators=(",", ":")) + "\n")
 
-        # Keep CPU footprint low for always-on mode.
-        time.sleep(5)
+        # Keep CPU footprint low for always-on mode (raise JETSPACE_MINIMON_INTERVAL_SEC if needed).
+        time.sleep(float(os.getenv("JETSPACE_MINIMON_INTERVAL_SEC", "8")))
 
 
 if __name__ == "__main__":

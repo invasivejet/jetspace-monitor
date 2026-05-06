@@ -2,11 +2,20 @@
 
 Organized MVP for safe, real-time system observability.
 
+**User guide (what it does, how to run it, private GitHub on invasivejet):** [`docs/USAGE.md`](docs/USAGE.md)
+
 ## Structure
 
 - `backend/` FastAPI + WebSocket system metrics service
 - `frontend/` React + Vite dashboard
-- `docs/` architecture and operating notes
+- `docs/` architecture, packaging, and operating notes
+
+**Publishing / what belongs on GitHub:** see [`docs/PACKAGING.md`](docs/PACKAGING.md) (invariants, ignored paths, WSL vs PowerShell paths).
+
+**Git remotes (invasivejet = canonical `origin`), jetbundle org, Pages repo notes:** [`docs/GITHUB-REMOTES-AND-ORGS.md`](docs/GITHUB-REMOTES-AND-ORGS.md).  
+Verify wiring: `.\scripts\verify-git-flow.ps1`
+
+**Windows desktop `.exe`:** `.\scripts\build-jetspace-exe.ps1` then run `backend\dist\JetspaceMonitor\JetspaceMonitor.exe` (starts API + opens `/control`).
 
 ## Quick Start (Windows PowerShell)
 
@@ -25,7 +34,7 @@ cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-uvicorn app:app --reload --host 127.0.0.1 --port 8000
+uvicorn app:app --reload --host 127.0.0.1 --port 8010
 ```
 
 ### 2) Frontend
@@ -141,7 +150,7 @@ Runs created:
 Design goals:
 
 - localhost-only telemetry surface (no remote egress behavior)
-- low-overhead loop (5s sampling)
+- low-overhead loop (interval configurable; see `JETSPACE_MINIMON_INTERVAL_SEC` in `backend/.env.example`)
 - bounded append-only local stream for diagnostics
 - ethical scope: observe/diagnose, never covertly exfiltrate/control
 

@@ -1,15 +1,26 @@
 #!/usr/bin/env bash
-# Add or update the "mirror" remote for a second GitHub account (e.g. invasivejet).
 set -euo pipefail
-SSH_HOST_ALIAS="${1:-github.com-ij}"
+
+# Usage: bash scripts/setup-github-mirror-remote.sh [ssh-host-alias] [owner] [repo] [remote-name]
+# Example: bash scripts/setup-github-mirror-remote.sh github.com-ij invasivejet jetspace-monitor mirror
+
+ALIAS="${1:-github.com-ij}"
 OWNER="${2:-invasivejet}"
-REPO="${3:-jetspace-monitor}"
-URL="git@${SSH_HOST_ALIAS}:${OWNER}/${REPO}.git"
-if git remote get-url mirror >/dev/null 2>&1; then
-  git remote set-url mirror "$URL"
-  echo "Updated mirror -> $URL"
+REPO_NAME="${3:-jetspace-monitor}"
+REMOTE="${4:-mirror}"
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+URL="git@${ALIAS}:${OWNER}/${REPO_NAME}.git"
+
+if git remote get-url "$REMOTE" >/dev/null 2>&1; then
+  echo "Updating remote '$REMOTE' -> $URL"
+  git remote set-url "$REMOTE" "$URL"
 else
-  git remote add mirror "$URL"
-  echo "Added mirror -> $URL"
+  echo "Adding remote '$REMOTE' -> $URL"
+  git remote add "$REMOTE" "$URL"
 fi
+
+echo ""
 git remote -v

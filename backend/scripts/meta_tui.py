@@ -96,7 +96,7 @@ def _render(phys, control, problems):
         f"{lilac}Complexity note:{reset} asymptotic class + hardware geometry (memory locality, parallel width) determine real speed.",
         f"{lilac}Hamiltonian note:{reset} discrete symplectic updates preserve structure better than naive updates.",
         "",
-        f"{purple}keys:{reset} Ctrl+C quit | refresh every 2s",
+        f"{purple}keys:{reset} Ctrl+C quit | refresh ~{os.getenv('JETSPACE_META_REFRESH_SEC', '2.5')}s",
     ]
     sys.stdout.write("\n".join(lines))
     sys.stdout.flush()
@@ -113,7 +113,7 @@ def main():
             sys.stdout.write("\033[2J\033[H\033[38;5;197mAPI not reachable at " + API_BASE + "\033[0m\n")
             sys.stdout.write("Start backend API then retry.\n")
             sys.stdout.flush()
-        time.sleep(2)
+        time.sleep(float(os.getenv("JETSPACE_META_REFRESH_SEC", "2.5")))
 
 
 if __name__ == "__main__":

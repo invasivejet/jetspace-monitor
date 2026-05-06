@@ -24,3 +24,22 @@ backend/data/
 
 # Generated audits / local diagnostics (reproducible from scripts)
 reports/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Optional local tooling
+*.sqlite
+*.db
+
+# PyInstaller (desktop bundle built from backend/)
+backend/build/
+backend/dist/

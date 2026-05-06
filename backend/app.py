@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import platform
 import time
 from collections import deque
@@ -127,7 +128,7 @@ async def ws_stats(ws: WebSocket) -> None:
             sample = state.capture()
             phys = physics.capture()
             await ws.send_json({"sample": asdict(sample), "physics": phys})
-            await asyncio.sleep(1)
+            await asyncio.sleep(float(os.getenv("JETSPACE_WS_INTERVAL_SEC", "1.5")))
     except Exception:
         await ws.close()
 

@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
-# Push current branch to both GitHub remotes (origin + mirror).
 set -euo pipefail
-branch="${1:-$(git rev-parse --abbrev-ref HEAD)}"
-echo "Pushing ${branch} to origin..."
-git push origin "${branch}"
-echo "Pushing ${branch} to mirror..."
-git push mirror "${branch}"
-echo "Done."
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+BRANCH="${1:-$(git rev-parse --abbrev-ref HEAD)}"
+echo "Pushing branch: $BRANCH"
+
+git remote get-url origin >/dev/null
+git remote get-url mirror >/dev/null
+
+git push -u origin "$BRANCH"
+git push -u mirror "$BRANCH"

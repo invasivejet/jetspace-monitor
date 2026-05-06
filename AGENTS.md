@@ -16,6 +16,14 @@ There is no single global path; each machine has its own clone. Standardize with
 
 Set `JETSPACE_ROOT` to the repo root when paths must match across tools.
 
+### Paths: PowerShell vs WSL (common mistakes)
+
+Full table: **`docs/PACKAGING.md`** §1.
+
+- **PowerShell** on Windows uses **`C:\Users\<you>\jetspace-monitor`**. It does **not** understand Linux paths like `/mnt/c/...` (you may see it rewrite to a bogus `C:\mnt\c\...`).
+- **WSL** uses **`/mnt/c/Users/<you>/jetspace-monitor`** for the same folder.
+- If you type **`bash`** in PowerShell, Windows often runs **Git Bash**, not WSL. Git Bash prefers **`/c/Users/...`**, not **`/mnt/c/...`**. For key generation inside **WSL’s** home and `ssh-keygen`, use **`wsl.exe`** or **`Run-WslSshKeygen.ps1`** from the repo root.
+
 ## Environment
 
 - `JETSPACE_ROOT`, `JETSPACE_REPORTS_DIR`, `JETSPACE_API_BASE` — see `backend/.env.example`
@@ -32,41 +40,83 @@ With the FastAPI app on **127.0.0.1:8010** (see `scripts/dev.ps1`, `scripts/secu
 
 Full architecture: `docs/architecture.md`
 
+GitHub: **invasivejet** as canonical `origin`, **jetbundle** org, public audit notes for **jetbundle.github.io**: `docs/GITHUB-REMOTES-AND-ORGS.md` — run `scripts/verify-git-flow.ps1` after retargeting remotes.
+
 ## Modal
 
 - Contract and tiers: `backend/modal_workflow.py` and `GET /modal/workflow`
 - Do not store Modal tokens in the repo; use `modal setup` and Modal Secrets.
 
-## GitHub: two namespaces (e.g. personal + `invasivejet`)
+## GitHub: two namespaces (e.g. `joel-saucedo` + `invasivejet`)
 
 Use **two remotes** and normal Git history — keep **LICENSE and contributors** accurate.
 
 ```text
-origin     → primary repo you work against daily (e.g. joel-saucedo/jetspace-monitor)
-mirror     → second GitHub repo (e.g. invasivejet/jetspace-monitor)
+origin     → primary repo (e.g. git@github.com-js:joel-saucedo/jetspace-monitor.git)
+mirror     → second repo (e.g. git@github.com-ij:invasivejet/jetspace-monitor.git)
 ```
 
-Add the second remote once the empty repo exists on GitHub:
+`github.com-js` / `github.com-ij` are **SSH config Host aliases** (not real DNS names). They force the correct key per remote.
+
+### 1) Create the empty repo on GitHub
+
+Log in as **invasivejet** → **New repository** → `jetspace-monitor` → leave **empty** (no README) if you will push an existing history.
+
+`gh` logged in as another user will not create repos under `invasivejet`; use the browser or `gh auth login` as that account.
+
+### 2) Generate two SSH keys (never commit private keys)
+
+Scripts live **inside the repo**. If you run them from `~` or `C:\Users\joela`, paths like `.\scripts\...` fail. Either **`cd` into the repo first**, or use the **repo-root wrappers** (work from any directory).
+
+**Windows (OpenSSH; use if `git` is the Windows Git):**
+
+```powershell
+cd C:\Users\<you>\jetspace-monitor
+.\ssh-keygen-github.ps1 -KeyName joel
+.\ssh-keygen-github.ps1 -KeyName invasivejet
+```
+
+Or from anywhere (full path to **repo root** script):
+
+```powershell
+& "C:\Users\<you>\jetspace-monitor\ssh-keygen-github.ps1" -KeyName invasivejet
+```
+
+**WSL (use if you run `git` only inside WSL):**
+
+From repo root:
 
 ```bash
-git remote add mirror https://github.com/invasivejet/jetspace-monitor.git
-# or SSH: git@github.com:invasivejet/jetspace-monitor.git
-git fetch mirror
-git push mirror main
+cd /mnt/c/Users/<you>/jetspace-monitor
+bash scripts/ssh-keygen-github-wsl.sh joel
+bash scripts/ssh-keygen-github-wsl.sh invasivejet
 ```
 
-Ongoing:
+From **any** directory **inside WSL** (wrapper calls `scripts/…` for you):
 
 ```bash
-git push origin main
-git push mirror main
+bash /mnt/c/Users/<you>/jetspace-monitor/ssh-keygen-wsl.sh joel
+bash /mnt/c/Users/<you>/jetspace-monitor/ssh-keygen-wsl.sh invasivejet
 ```
 
-For **SSH with two GitHub accounts**, use separate keys and `~/.ssh/config` `Host` aliases. Point **`origin`** at the host alias for `joel-saucedo` and **`mirror`** at the alias for `invasivejet` so each `git push` uses the correct key.
+**From Windows PowerShell** (forces **WSL** bash — avoids Git Bash + `/mnt` confusion):
 
-### Example `~/.ssh/config` (WSL or Windows OpenSSH)
+```powershell
+cd C:\Users\<you>\jetspace-monitor
+.\Run-WslSshKeygen.ps1 -KeyTag joel
+.\Run-WslSshKeygen.ps1 -KeyTag invasivejet
+```
 
-Use your real key paths. `IdentitiesOnly yes` avoids the wrong key being offered first.
+If you see `set: pipe: invalid option name`, your `.sh` files had Windows **CRLF** line endings; re-checkout or save scripts as **LF**. Repo includes `.gitattributes` so `*.sh` stay LF.
+
+Add each **`.pub`** file to the matching GitHub account → **Settings → SSH and GPG keys**.
+
+### 3) SSH config: two Host blocks
+
+Template: `scripts/ssh-config.github.template`
+
+- **Windows:** `C:\Users\<you>\.ssh\config`
+- **WSL:** `~/.ssh/config`
 
 ```sshconfig
 Host github.com-js
@@ -82,26 +132,61 @@ Host github.com-ij
   IdentitiesOnly yes
 ```
 
-Then set remotes (after repos exist on GitHub):
+On Windows, `IdentityFile` may be `C:/Users/<you>/.ssh/id_ed25519_joel` (forward slashes work in OpenSSH).
+
+### 4) Verify SSH before pushing
+
+```bash
+ssh -T git@github.com-js
+ssh -T git@github.com-ij
+```
+
+Each should greet the **correct** GitHub username.
+
+### 5) Point `origin` at joel-saucedo (if not already)
 
 ```bash
 git remote add origin git@github.com-js:joel-saucedo/jetspace-monitor.git
-# or: gh repo create ... sets HTTPS origin; switch with git remote set-url
-./scripts/setup-github-mirror-remote.sh github.com-ij invasivejet jetspace-monitor
+# or: git remote set-url origin git@github.com-js:joel-saucedo/jetspace-monitor.git
 ```
 
-**Push both** in one step:
+### 6) Register `mirror` remote
 
-- WSL / Git Bash: `bash scripts/git-push-both.sh`
+**PowerShell (repo root):**
+
+```powershell
+.\scripts\setup-github-mirror-remote.ps1 -SshHostAlias github.com-ij
+```
+
+**WSL / bash:**
+
+```bash
+bash scripts/setup-github-mirror-remote.sh github.com-ij invasivejet jetspace-monitor mirror
+```
+
+### 7) First push to `mirror`, then routine dual push
+
+```bash
+git branch -M main
+git push -u origin main
+git push -u mirror main
+```
+
+**Both in one step:**
+
 - PowerShell: `.\scripts\git-push-both.ps1`
+- WSL: `bash scripts/git-push-both.sh`
 
-**Day-to-day “toggle”:** you do not switch GitHub accounts in Git itself — you only choose *which remote* you push to (`origin`, `mirror`, or both). Keep `user.name` / `user.email` consistent with the identity that should own the commits (usually one primary author; see README / LICENSE).
+Optional branch: `.\scripts\git-push-both.ps1 -Branch main` or `bash scripts/git-push-both.sh main`.
 
-### First-time checklist for `invasivejet`
+### Day-to-day “toggle”
 
-1. On GitHub, log in as **invasivejet** → create an empty **private** repo `jetspace-monitor` (no README).
-2. Generate an SSH key and add the **public** key to **invasivejet** → Settings → SSH keys.
-3. In this clone, run `setup-github-mirror-remote` with your chosen SSH host alias.
-4. `git push mirror main` (or `git-push-both`).
+You do **not** switch GitHub users inside one clone per push. You choose the **remote** (`origin` vs `mirror`). SSH picks the key because **`mirror`’s URL uses `github.com-ij`** while **`origin` uses `github.com-js`**.
+
+Keep `user.name` / `user.email` consistent with how you want commits attributed (see README / LICENSE).
+
+### `gh` CLI vs `git push`
+
+`gh` auth is separate. After remotes use SSH, day-to-day pushes are `git push`; use `gh` only when you need API actions for the account that `gh` is logged into.
 
 This “couples” the same codebase to both accounts **transparently in Git** (two URLs), not by hiding who maintains what.

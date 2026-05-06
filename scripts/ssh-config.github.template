@@ -1,0 +1,25 @@
+# Copy these Host blocks into your real SSH config:
+#   Windows:  C:\Users\<you>\.ssh\config
+#   WSL:      ~/.ssh/config
+#
+# Replace IdentityFile paths:
+#   WSL:      /home/<you>/.ssh/id_ed25519_joel
+#   Windows:  C:/Users/<you>/.ssh/id_ed25519_joel
+#
+# Generate keys:
+#   Windows:  .\scripts\ssh-keygen-github.ps1 -KeyName joel
+#             .\scripts\ssh-keygen-github.ps1 -KeyName invasivejet
+#   WSL:      bash scripts/ssh-keygen-github-wsl.sh joel
+#             bash scripts/ssh-keygen-github-wsl.sh invasivejet
+
+Host github.com-js
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_joel
+  IdentitiesOnly yes
+
+Host github.com-ij
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_invasivejet
+  IdentitiesOnly yes
