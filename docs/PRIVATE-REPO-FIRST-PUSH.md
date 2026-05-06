@@ -80,6 +80,14 @@ git push origin main
 
 Until that is done, you can still push to **joel-saucedo** (backup remote): `git push joel-saucedo main`.
 
-## 7) Automation limit
+## 7) Cursor / PowerShell breaks `git commit` (trailer injection)
 
-Automated agents cannot complete `git push` with your credentials. Run Git + SSH on your machine.
+If `git commit` fails in PowerShell with a parse error around `<`, run commits from **WSL** or **cmd.exe**:
+
+```bash
+wsl bash -c "cd /mnt/c/Users/joela/jetspace-monitor && git add -A && GIT_EDITOR=true git commit -m 'your message' && git push origin main && git push joel-saucedo main"
+```
+
+## 8) Automation limit
+
+Agents cannot push without your SSH keys. Run Git on your machine.
