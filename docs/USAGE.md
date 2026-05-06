@@ -92,6 +92,7 @@ Your SSH client is offering **joel-saucedo’s** key to `git@github.com`, but **
 | `docs/GITHUB-REMOTES-AND-ORGS.md` | invasivejet, jetbundle org, remotes |
 | `docs/PRIVATE-REPO-FIRST-PUSH.md` | Private repo on invasivejet + first `git push` |
 | `docs/ROADMAP-SITE-AND-COMPUTE.md` | jetbundle.github.io vs hosted API |
+| `docs/WINDOWS-DESKTOP-OPERATOR.md` | **.exe** build, disk cleanup, Modal safety, GitHub links |
 | `README.md` | Extended quick start, Modal, hotkeys |
 
 ### Commit + push (script finds `git.exe`)

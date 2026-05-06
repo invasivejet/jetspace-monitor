@@ -15,7 +15,7 @@ Organized MVP for safe, real-time system observability.
 **Git remotes (invasivejet = canonical `origin`), jetbundle org, Pages repo notes:** [`docs/GITHUB-REMOTES-AND-ORGS.md`](docs/GITHUB-REMOTES-AND-ORGS.md).  
 Verify wiring: `.\scripts\verify-git-flow.ps1`
 
-**Windows desktop `.exe`:** `.\scripts\build-jetspace-exe.ps1` then run `backend\dist\JetspaceMonitor\JetspaceMonitor.exe` (starts API + opens `/control`).
+**Windows desktop `.exe` (PC health + safe cleanup + Modal notes):** [`docs/WINDOWS-DESKTOP-OPERATOR.md`](docs/WINDOWS-DESKTOP-OPERATOR.md) — build: `.\scripts\build-jetspace-exe.ps1` → `backend\dist\JetspaceMonitor\JetspaceMonitor.exe`.
 
 ## Quick Start (Windows PowerShell)
 
